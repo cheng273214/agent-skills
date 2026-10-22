@@ -21,4 +21,4 @@ Copy the entire `skill-flow` directory (keep `SKILL.md`, `schema/`, `examples/`,
 | `examples/` | Golden compile fixture |
 | `reference/compile-and-gates.md` | Compile + gate rules |
 
-See the [monorepo README](../../README.md) for catalog context.
+See the [root README](../../README.md) for what skill-flow does, when to use it, and how to install it.
