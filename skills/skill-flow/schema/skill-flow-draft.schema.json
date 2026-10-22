@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/skill-flow-oneclick/skill-flow-draft.schema.json",
+  "title": "SkillFlowDraft",
+  "description": "流程 Skill 草稿契约。落盘时 skill-flow.json 只持久化 nodes；SKILL.md 由编译规则生成。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "description",
+    "whenToUse",
+    "forbid",
+    "inputs",
+    "outputs",
+    "nodes"
+  ],
+  "properties": {
+    "clientResourceId": {
+      "type": "string",
+      "description": "可选稳定编号。新建时省略；更新已有目录时可用 slug 或目录名定位。"
+    },
+    "slug": {
+      "type": "string",
+      "description": "写入 SKILL.md frontmatter name 的稳定标识。首次保存后宿主应锁定，不再随名称变化。"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "给人看的 Skill 名称。"
+    },
+    "description": {
+      "type": "string",
+      "description": "这个 Skill 做什么。编译进 frontmatter description 的前半句。"
+    },
+    "whenToUse": {
+      "type": "string",
+      "description": "何时启用。应包含用户真实说法。"
+    },
+    "forbid": {
+      "type": "string",
+      "description": "禁止事项。可空，但闸门会给出警告。"
+    },
+    "inputs": {
+      "type": "array",
+      "description": "用户运行前要提供的参数。可以是空数组。工具返回的数据不要放这里。",
+      "items": {
+        "$ref": "#/$defs/inputField"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "description": "至少一个有名称的输出，否则不能标记为可发布。",
+      "items": {
+        "$ref": "#/$defs/outputField"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "testInput": {
+      "type": "string",
+      "description": "可选试运行输入。不写入 SKILL.md。"
+    }
+  },
+  "$defs": {
+    "inputField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "载体。推荐「文本」或「文件」。旧数据可能是 string。"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "example": {
+          "type": "string",
+          "description": "文本样例。"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "fileNote": {
+          "type": "string",
+          "description": "样例文件的结构、口径、列或页。"
+        },
+        "sampleRelativePath": {
+          "type": "string",
+          "description": "相对 Skill 目录，例如 samples/input-1-周报.xlsx。"
+        }
+      }
+    },
+    "outputField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "type": "string",
+          "description": "载体。推荐「文本」或「文件」。旧数据可能是 markdown、json。"
+        },
+        "quality": {
+          "type": "string",
+          "description": "完成质量，例如必须包含的章节。"
+        },
+        "example": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "fileNote": {
+          "type": "string"
+        },
+        "sampleRelativePath": {
+          "type": "string"
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "start",
+            "collect",
+            "call",
+            "process",
+            "produce",
+            "decide",
+            "join",
+            "each",
+            "check",
+            "end"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "x": {
+          "type": "number",
+          "description": "画布横坐标。缺省 280。卡片宽 228。"
+        },
+        "y": {
+          "type": "number",
+          "description": "画布纵坐标。缺省按序 48 + index * 132。卡片高 86。"
+        },
+        "nextIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "下一步。判断节点不用此字段。校验的通过和失败都写在这里。结束节点应为空。"
+        },
+        "yesId": {
+          "type": "string",
+          "description": "判断节点：条件成立时的下一节点。"
+        },
+        "noId": {
+          "type": "string",
+          "description": "判断节点：条件不成立时的下一节点。"
+        },
+        "waitUser": {
+          "type": "boolean",
+          "description": "为 true 时编译进「等待用户输入后再继续」。收集节点默认为 true。"
+        },
+        "desc": {
+          "type": "string",
+          "description": "这一步要完成的事，祈使句。"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "开始节点：触发场景。契约 whenToUse 为空时可作为回退。"
+        },
+        "scope": {
+          "type": "string",
+          "description": "开始节点：适用边界。非空时编译成「适用边界」章节。"
+        },
+        "forbid": {
+          "type": "string",
+          "description": "开始节点上的禁止事项。契约 forbid 为空时作为回退。"
+        },
+        "params": {
+          "type": "string",
+          "description": "收集节点：要收集的参数。"
+        },
+        "ask": {
+          "type": "string",
+          "description": "收集节点：追问规则。"
+        },
+        "callKind": {
+          "enum": [
+            "mcp",
+            "script"
+          ],
+          "description": "调用节点。缺省：有脚本路径则为 script，否则 mcp。"
+        },
+        "mcp": {
+          "type": "string",
+          "description": "MCP 名称或编号。不要编造未知 MCP。"
+        },
+        "tool": {
+          "type": "string",
+          "description": "MCP Tool 名称。可空，表示只绑定到 MCP。"
+        },
+        "skillDep": {
+          "type": "string",
+          "description": "改为调用另一个 Skill。与 mcp 互斥时，无 mcp 才编译成「其他 Skill」。"
+        },
+        "scriptRelativePath": {
+          "type": "string",
+          "description": "相对 Skill 目录的脚本，例如 scripts/check.py。必须在包内清单中。"
+        },
+        "action": {
+          "type": "string",
+          "description": "处理规则，或脚本调用说明。"
+        },
+        "freedom": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "description": "处理节点自由度。编译为低 / 中 / 高。"
+        },
+        "template": {
+          "type": "string",
+          "description": "生成节点的产出模板。"
+        },
+        "access": {
+          "enum": [
+            "read",
+            "write"
+          ],
+          "description": "write 会编译成「本步可写，须在禁止事项中声明」。"
+        },
+        "fail": {
+          "type": "string",
+          "description": "本步失败时怎么做。不要写节点编号。"
+        },
+        "cond": {
+          "type": "string",
+          "description": "判断条件。判断节点必填，否则阻断。"
+        },
+        "checks": {
+          "type": "string",
+          "description": "校验清单。"
+        },
+        "joinMode": {
+          "enum": [
+            "all",
+            "any"
+          ],
+          "description": "汇聚等待策略。缺省 all。"
+        },
+        "merge": {
+          "type": "string",
+          "description": "汇聚时如何合并多路结果。"
+        },
+        "listFrom": {
+          "type": "string",
+          "description": "逐条节点的列表来源。"
+        },
+        "eachDo": {
+          "type": "string",
+          "description": "逐条节点对每一项做什么。"
+        },
+        "eachMode": {
+          "enum": [
+            "serial",
+            "parallel"
+          ]
+        },
+        "success": {
+          "type": "string",
+          "description": "结束节点：对用户的完成标准。这是文字，不是节点编号。"
+        },
+        "failOut": {
+          "type": "string",
+          "description": "结束节点：失败说明。这是文字，不是节点编号。空则使用默认失败处理。"
+        }
+      }
+    }
+  }
+}

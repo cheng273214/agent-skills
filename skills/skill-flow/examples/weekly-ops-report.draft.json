@@ -1,0 +1,93 @@
+{
+  "slug": "weekly-ops-report",
+  "name": "经营周报",
+  "description": "按区域汇总本周经营数据并写出周报",
+  "whenToUse": "经营周报、周报数据、本周汇总，或要按区域出周报",
+  "forbid": "不得编造工具未返回的数字；无权限或空结果时停止",
+  "inputs": [
+    {
+      "name": "区域",
+      "type": "文本",
+      "required": true,
+      "example": "华东"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "周报",
+      "format": "文本",
+      "quality": "含区域、本周要点和异常项"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "start",
+      "name": "开始",
+      "x": 280,
+      "y": 48,
+      "nextIds": ["n2"]
+    },
+    {
+      "id": "n2",
+      "type": "collect",
+      "name": "收集区域",
+      "x": 280,
+      "y": 180,
+      "nextIds": ["n3"],
+      "waitUser": true,
+      "desc": "向用户确认区域",
+      "params": "区域"
+    },
+    {
+      "id": "n3",
+      "type": "call",
+      "name": "查询经营数据",
+      "x": 280,
+      "y": 312,
+      "nextIds": ["n4"],
+      "callKind": "mcp",
+      "mcp": "经营数据",
+      "tool": "查询周报",
+      "desc": "按区域读取本周经营数据"
+    },
+    {
+      "id": "n4",
+      "type": "process",
+      "name": "汇总",
+      "x": 280,
+      "y": 444,
+      "nextIds": ["n5"],
+      "action": "按区域汇总销售额与异常",
+      "freedom": "medium"
+    },
+    {
+      "id": "n5",
+      "type": "produce",
+      "name": "写周报",
+      "x": 280,
+      "y": 576,
+      "nextIds": ["n6"],
+      "template": "区域、本周要点、异常项"
+    },
+    {
+      "id": "n6",
+      "type": "check",
+      "name": "核对数字",
+      "x": 280,
+      "y": 708,
+      "nextIds": ["n7"],
+      "checks": "每个数字都能回溯到工具返回"
+    },
+    {
+      "id": "n7",
+      "type": "end",
+      "name": "结束",
+      "x": 280,
+      "y": 840,
+      "nextIds": [],
+      "success": "向用户交付周报正文",
+      "failOut": "缺权限或空结果时说明原因并停止，不编造数字"
+    }
+  ]
+}
